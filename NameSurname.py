@@ -79,43 +79,58 @@ def run(sort_type, n, input):
 
 f = open('output.txt', 'w')
 
-def printArray(array, size):
-  for i in range(size - 1):
-    f.write(f'{array[i]}-')
+#---------------------------#
+#     PROGRAM STARTS HERE   #
+#---------------------------#
 
-  f.write(f'{array[size - 1]}\n')
-
-# Version
 for n in [100, 1000, 10000]:
+  f.write(f'n = {n}\n')
   for input_type, maxElement in enumerate([10*n, math.ceil(0.75*n), math.ceil(0.25*n), 1]):
-    for version in range(1,5):
-      # Average Case
-      average_time = 0
-      for average in range(1,6):
-        averageInput = [random.randint(1, maxElement) for T in range(n)]
+    f.write(f'\tInpType{input_type + 1}\n')
 
-        # If version is 3, start the algorithm by shuffling the list
+    ### Average Case ###
+    averageTime = [0,0,0,0]
+
+    for avg in [1,2,3,4,5]:
+      averageInput = [random.randint(1, maxElement) for T in range(n)]
+      f.write(f'\tInput{avg}: (Average)\n\t')
+      f.write('-'.join(map(str, averageInput)) + '\n')
+
+      # For each version
+      for version in range(4):
+        averageInputCopy = averageInput.copy()
+
+        # If version is 3, shuffle in advance
         if version == 3:
-          random.shuffle(averageInput)
-        f.write(f'Input {average}: (Average)')
-        printArray(averageInput, n)
-        average_time += run(version, n, averageInput)
-        f.write(f'Output {average}: (Average)')
-        printArray(averageInput, n)
-      average_time /= 5
+          random.shuffle(averageInputCopy)
+        
+        # Run algorithm
+        averageTime[version]  += run(version + 1, n, averageInputCopy)
 
-      # Worst Case
-      worstInput = sorted([random.randint(1, maxElement) for T in range(n)])
-      f.write('Input: (Worst)')
-      printArray(worstInput, n)
+    # Calculating average execution time
+    for version in range(4):
+      averageTime[version] /= 4
 
-      # If version is 3, start the algorithm by shuffling the list
+    ### Worst Case ###
+    worstTime = [0,0,0,0]
+
+    worstInput = sorted([random.randint(1, maxElement) for T in range(n)]) # Input is already sorted
+    f.write('\tInput: (Worst)\n\t')
+    f.write('-'.join(map(str, worstInput)) + '\n')
+
+    # For each version
+    for version in range(4):
+      worstInputCopy = worstInput.copy()
+
+      # If version is 3, shuffle in advance
       if version == 3:
-          random.shuffle(worstInput)
+        random.shuffle(worstInputCopy)
+      
+      # Run algorithm
+      worstTime[version] = run(version + 1, n, worstInputCopy)
 
-      worstTime = run(version, n, worstInput)
-      f.write('Output: (Worst)')
-      printArray(worstInput, n)
-
-      f.write(f"Version: {version}\tN: {n}\tinputType: {input_type + 1}\tAverage Time: {average_time}\tWorst Time: {worstTime}\n\n")
-
+    for version in range(4):
+      f.write(f'\tVer{version + 1} Average = {averageTime[version]}\n')
+      f.write(f'\tVer{version + 1} Worst   = {worstTime[version]}\n')
+    
+    f.write('\n')
